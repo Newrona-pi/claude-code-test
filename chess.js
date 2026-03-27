@@ -47,7 +47,7 @@ const ChessGame = (function() {
     el('chess-btn-' + mode).classList.add('active');
     const timeSel = el('chess-time-selector');
     if (mode === 'pvp') {
-      timeSel.style.display = 'flex';
+      timeSel.style.display = 'grid';
     } else {
       timeSel.style.display = 'none';
       timeMode = 'none';
@@ -839,17 +839,15 @@ const ChessGame = (function() {
   function buildHTML() {
     container.innerHTML = `
       <div id="chess-controls" style="margin-bottom:12px;max-width:576px;">
-        <div id="chess-mode-selector" style="margin-bottom:8px;display:flex;justify-content:center;gap:6px;flex-wrap:wrap;">
-          <div style="width:100%;display:flex;justify-content:center;margin-bottom:4px;">
-            <button id="chess-btn-pvp">\uD83D\uDC65 \u5BFE\u4EBA\u6226</button>
-          </div>
+        <div id="chess-mode-selector" style="margin-bottom:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:5px;max-width:320px;margin-left:auto;margin-right:auto;">
+          <button id="chess-btn-pvp">\uD83D\uDC65 \u5BFE\u4EBA\u6226</button>
           <button id="chess-btn-cpu-beginner">\u5165\u9580</button>
           <button id="chess-btn-cpu-easy">\u521D\u7D1A</button>
           <button id="chess-btn-cpu-medium">\u4E2D\u7D1A</button>
           <button id="chess-btn-cpu-hard">\u4E0A\u7D1A</button>
           <button id="chess-btn-cpu-expert">\u6700\u5F37</button>
         </div>
-        <div id="chess-time-selector" style="margin-bottom:8px;display:none;justify-content:center;gap:6px;flex-wrap:wrap;">
+        <div id="chess-time-selector" style="margin-bottom:8px;display:none;grid-template-columns:repeat(4,1fr);gap:5px;max-width:320px;margin-left:auto;margin-right:auto;">
           <button id="chess-btn-time-none">\u5236\u9650\u306A\u3057</button>
           <button id="chess-btn-time-30s">30\u79D2</button>
           <button id="chess-btn-time-60s">60\u79D2</button>

@@ -560,7 +560,7 @@ const ShogiGame = (function() {
     el('shogi-btn-' + mode).classList.add('active');
     const timeSel = el('shogi-time-selector');
     if (mode === 'pvp') {
-      timeSel.style.display = 'flex';
+      timeSel.style.display = 'grid';
     } else {
       timeSel.style.display = 'none';
       timeMode = 'none';
@@ -1086,17 +1086,15 @@ const ShogiGame = (function() {
   function buildHTML() {
     container.innerHTML = `
       <div id="shogi-controls" style="margin-bottom:12px;max-width:620px;">
-        <div id="shogi-mode-selector" style="margin-bottom:8px;display:flex;justify-content:center;gap:6px;flex-wrap:wrap;">
-          <div style="width:100%;display:flex;justify-content:center;margin-bottom:4px;">
-            <button id="shogi-btn-pvp">👥 対人戦</button>
-          </div>
+        <div id="shogi-mode-selector" style="margin-bottom:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:5px;max-width:320px;margin-left:auto;margin-right:auto;">
+          <button id="shogi-btn-pvp">👥 対人戦</button>
           <button id="shogi-btn-cpu-beginner">入門</button>
           <button id="shogi-btn-cpu-easy">初級</button>
           <button id="shogi-btn-cpu-medium">中級</button>
           <button id="shogi-btn-cpu-hard">上級</button>
           <button id="shogi-btn-cpu-expert">最強</button>
         </div>
-        <div id="shogi-time-selector" style="margin-bottom:8px;display:none;justify-content:center;gap:6px;flex-wrap:wrap;">
+        <div id="shogi-time-selector" style="margin-bottom:8px;display:none;grid-template-columns:repeat(4,1fr);gap:5px;max-width:320px;margin-left:auto;margin-right:auto;">
           <button id="shogi-btn-time-none">制限なし</button>
           <button id="shogi-btn-time-30s">30秒</button>
           <button id="shogi-btn-time-60s">60秒</button>
