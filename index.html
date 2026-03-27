@@ -11,14 +11,19 @@ body {
   min-height: 100vh; background: #1a1a2e; font-family: 'Segoe UI', sans-serif;
   color: #e0e0e0;
 }
-.container { text-align: center; }
-h1 { font-size: 1.8rem; margin-bottom: 12px; color: #e0e0e0; letter-spacing: 2px; }
+.container {
+  text-align: center; display: inline-flex; flex-direction: column; align-items: center;
+}
+h1 { font-size: 1.8rem; margin-bottom: 10px; color: #e0e0e0; letter-spacing: 2px; }
+#controls {
+  margin-bottom: 12px; max-width: 576px;
+}
 #status {
-  font-size: 1.1rem; margin-bottom: 12px; padding: 8px 16px;
+  font-size: 1.05rem; margin-bottom: 8px; padding: 6px 16px;
   background: #16213e; border-radius: 8px; display: inline-block;
 }
 #mode-selector {
-  margin-bottom: 14px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 8px; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap;
 }
 #mode-selector button {
   padding: 5px 12px; font-size: 0.85rem;
@@ -110,7 +115,7 @@ h1 { font-size: 1.8rem; margin-bottom: 12px; color: #e0e0e0; letter-spacing: 2px
   100% { box-shadow: inset 0 0 16px 4px rgba(255,0,0,0.6); }
 }
 #time-selector {
-  margin-bottom: 10px; display: none; justify-content: center; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 8px; display: none; justify-content: center; gap: 6px; flex-wrap: wrap;
 }
 #time-selector button {
   padding: 4px 10px; font-size: 0.8rem;
@@ -120,9 +125,15 @@ h1 { font-size: 1.8rem; margin-bottom: 12px; color: #e0e0e0; letter-spacing: 2px
 #time-selector button:hover { background: #1a4a8a; }
 #time-selector button.active { border-color: #f6e47a; background: #1a4a8a; }
 #timers {
-  display: none; justify-content: center; gap: 20px; margin-bottom: 10px;
+  display: none; justify-content: center; gap: 20px; margin-bottom: 8px;
   font-size: 1.1rem; font-family: 'Consolas', 'Courier New', monospace;
 }
+#start-btn {
+  display: none; margin: 0 auto 8px; padding: 8px 36px; font-size: 1rem;
+  background: #2e7d32; color: #fff; border: none; border-radius: 8px;
+  cursor: pointer; letter-spacing: 2px; transition: background 0.2s;
+}
+#start-btn:hover { background: #388e3c; }
 .timer-box {
   padding: 6px 16px; border-radius: 8px; min-width: 120px; text-align: center;
 }
@@ -137,15 +148,15 @@ h1 { font-size: 1.8rem; margin-bottom: 12px; color: #e0e0e0; letter-spacing: 2px
 .timer-label { font-size: 0.7rem; opacity: 0.7; }
 .timer-value { font-size: 1.3rem; font-weight: bold; }
 .timer-byoyomi { font-size: 0.65rem; color: #f6e47a; }
-.buttons { margin-top: 16px; }
+.buttons { margin-top: 10px; }
 .buttons button {
-  padding: 8px 20px; margin: 0 6px; font-size: 0.95rem;
+  padding: 7px 18px; margin: 0 5px; font-size: 0.9rem;
   background: #0f3460; color: #e0e0e0; border: none; border-radius: 6px;
   cursor: pointer; transition: background 0.2s;
 }
 .buttons button:hover { background: #1a4a8a; }
 #captured {
-  display: flex; justify-content: center; gap: 40px; margin-top: 12px; font-size: 28px;
+  display: flex; justify-content: center; gap: 30px; margin-top: 8px; font-size: 26px;
 }
 .captured-group { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; }
 #promotion-overlay {
@@ -169,21 +180,23 @@ h1 { font-size: 1.8rem; margin-bottom: 12px; color: #e0e0e0; letter-spacing: 2px
 <body>
 <div class="container">
   <h1>♔ チェス ♚</h1>
-  <div id="mode-selector">
-    <div style="width:100%; display:flex; justify-content:center; margin-bottom:6px;">
-      <button onclick="setMode('pvp')" id="btn-pvp">👥 対人戦</button>
+  <div id="controls">
+    <div id="mode-selector">
+      <div style="width:100%; display:flex; justify-content:center; margin-bottom:4px;">
+        <button onclick="setMode('pvp')" id="btn-pvp">👥 対人戦</button>
+      </div>
+      <button onclick="setMode('cpu-beginner')" id="btn-cpu-beginner">入門</button>
+      <button onclick="setMode('cpu-easy')" id="btn-cpu-easy">初級</button>
+      <button onclick="setMode('cpu-medium')" id="btn-cpu-medium">中級</button>
+      <button onclick="setMode('cpu-hard')" id="btn-cpu-hard">上級</button>
+      <button onclick="setMode('cpu-expert')" id="btn-cpu-expert">最強</button>
     </div>
-    <button onclick="setMode('cpu-beginner')" id="btn-cpu-beginner">入門</button>
-    <button onclick="setMode('cpu-easy')" id="btn-cpu-easy">初級</button>
-    <button onclick="setMode('cpu-medium')" id="btn-cpu-medium">中級</button>
-    <button onclick="setMode('cpu-hard')" id="btn-cpu-hard">上級</button>
-    <button onclick="setMode('cpu-expert')" id="btn-cpu-expert">最強</button>
-  </div>
-  <div id="time-selector">
-    <button onclick="setTimeMode('none')" id="btn-time-none">制限なし</button>
-    <button onclick="setTimeMode('30s')" id="btn-time-30s">30秒</button>
-    <button onclick="setTimeMode('60s')" id="btn-time-60s">60秒</button>
-    <button onclick="setTimeMode('5m15s')" id="btn-time-5m15s">5分+15秒</button>
+    <div id="time-selector">
+      <button onclick="setTimeMode('none')" id="btn-time-none">制限なし</button>
+      <button onclick="setTimeMode('30s')" id="btn-time-30s">30秒</button>
+      <button onclick="setTimeMode('60s')" id="btn-time-60s">60秒</button>
+      <button onclick="setTimeMode('5m15s')" id="btn-time-5m15s">5分+15秒</button>
+    </div>
   </div>
   <div id="timers">
     <div class="timer-box white-timer" id="timer-white">
@@ -197,7 +210,7 @@ h1 { font-size: 1.8rem; margin-bottom: 12px; color: #e0e0e0; letter-spacing: 2px
       <div class="timer-byoyomi" id="timer-black-byoyomi"></div>
     </div>
   </div>
-  <button id="start-btn" style="display:none; margin: 0 auto 10px; padding:10px 40px; font-size:1.1rem; background:#2e7d32; color:#fff; border:none; border-radius:8px; cursor:pointer; letter-spacing:2px; transition:background 0.2s;" onmouseover="this.style.background='#388e3c'" onmouseout="this.style.background='#2e7d32'" onclick="startGame()">▶ 開始</button>
+  <button id="start-btn" onclick="startGame()">▶ 開始</button>
   <div id="status">白の番です</div>
   <div class="board-wrapper">
     <div class="coords-col" id="coords-col"></div>
@@ -209,8 +222,8 @@ h1 { font-size: 1.8rem; margin-bottom: 12px; color: #e0e0e0; letter-spacing: 2px
     <div class="captured-group" id="captured-black"></div>
   </div>
   <div class="buttons">
-    <button onclick="undoMove()">↩ 元に戻す</button>
-    <button onclick="resetGame()">♻ 新しいゲーム</button>
+    <button onclick="undoMove()">↩ 戻す</button>
+    <button onclick="resetGame()">♻ 新規</button>
   </div>
 </div>
 <div id="promotion-overlay">
