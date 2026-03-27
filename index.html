@@ -9,63 +9,80 @@
 body {
   display: flex; justify-content: center; align-items: flex-start;
   min-height: 100vh;
-  /* Wood table base */
-  background-color: #5c3a1e;
-  background-image:
-    /* Wood grain lines */
-    repeating-linear-gradient(
-      95deg,
-      transparent 0px, transparent 18px,
-      rgba(0,0,0,0.06) 18px, rgba(0,0,0,0.06) 19px,
-      transparent 19px, transparent 40px
-    ),
-    repeating-linear-gradient(
-      92deg,
-      transparent 0px, transparent 30px,
-      rgba(255,220,160,0.04) 30px, rgba(255,220,160,0.04) 31px,
-      transparent 31px, transparent 55px
-    ),
-    /* Subtle knot/variation */
-    radial-gradient(ellipse at 30% 40%, rgba(80,50,20,0.5) 0%, transparent 40%),
-    radial-gradient(ellipse at 75% 70%, rgba(90,55,25,0.4) 0%, transparent 35%),
-    /* Warm lighting from above */
-    radial-gradient(ellipse at 50% 0%, rgba(255,230,180,0.12) 0%, transparent 60%),
-    /* Base gradient */
-    linear-gradient(180deg, #6b4426 0%, #5c3a1e 30%, #4a2e15 70%, #3d2410 100%);
-  background-attachment: fixed;
   font-family: 'Segoe UI', sans-serif;
   color: #e0e0e0; padding-top: 20px;
   position: relative;
+  transition: background-color 0.5s;
+}
+/* Western table (chess, othello) */
+body.theme-western {
+  background-color: #5c3a1e;
+  background-image:
+    repeating-linear-gradient(95deg,
+      transparent 0px, transparent 18px,
+      rgba(0,0,0,0.06) 18px, rgba(0,0,0,0.06) 19px,
+      transparent 19px, transparent 40px),
+    repeating-linear-gradient(92deg,
+      transparent 0px, transparent 30px,
+      rgba(255,220,160,0.04) 30px, rgba(255,220,160,0.04) 31px,
+      transparent 31px, transparent 55px),
+    radial-gradient(ellipse at 30% 40%, rgba(80,50,20,0.5) 0%, transparent 40%),
+    radial-gradient(ellipse at 75% 70%, rgba(90,55,25,0.4) 0%, transparent 35%),
+    radial-gradient(ellipse at 50% 0%, rgba(255,230,180,0.12) 0%, transparent 60%),
+    linear-gradient(180deg, #6b4426 0%, #5c3a1e 30%, #4a2e15 70%, #3d2410 100%);
+  background-attachment: fixed;
+}
+/* Japanese table (shogi) — tatami + wooden low table */
+body.theme-japanese {
+  background-color: #a08a5c;
+  background-image:
+    /* Tatami weave pattern */
+    repeating-linear-gradient(0deg,
+      rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px,
+      transparent 1px, transparent 4px),
+    repeating-linear-gradient(90deg,
+      rgba(0,0,0,0.02) 0px, rgba(0,0,0,0.02) 1px,
+      transparent 1px, transparent 6px),
+    /* Tatami color blocks */
+    repeating-linear-gradient(0deg,
+      #b89e6a 0px, #b89e6a 90px,
+      #a08a5c 90px, #a08a5c 91px,
+      #c4aa74 91px, #c4aa74 181px,
+      #a08a5c 181px, #a08a5c 182px),
+    /* Warm light */
+    radial-gradient(ellipse at 50% 0%, rgba(255,240,200,0.15) 0%, transparent 50%);
+  background-attachment: fixed;
 }
 body::before {
   content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  /* Fine wood texture noise */
   background-image:
-    repeating-linear-gradient(
-      88deg,
+    repeating-linear-gradient(88deg,
       transparent 0px, transparent 3px,
-      rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px
-    ),
-    repeating-linear-gradient(
-      93deg,
-      transparent 0px, transparent 7px,
-      rgba(255,200,120,0.02) 7px, rgba(255,200,120,0.02) 8px
-    );
+      rgba(0,0,0,0.02) 3px, rgba(0,0,0,0.02) 4px);
   pointer-events: none; z-index: 0;
 }
 .container {
   text-align: center; display: inline-flex; flex-direction: column; align-items: center;
   max-width: 700px; width: 100%;
   position: relative; z-index: 1;
-  /* Felt mat on the table */
-  background: linear-gradient(180deg, rgba(15,30,20,0.85) 0%, rgba(20,35,25,0.9) 100%);
   padding: 24px 20px 30px;
   border-radius: 16px;
+  transition: background 0.5s, border-color 0.5s, box-shadow 0.5s;
+}
+/* Western felt mat */
+body.theme-western .container {
+  background: linear-gradient(180deg, rgba(15,50,25,0.92) 0%, rgba(10,40,18,0.95) 100%);
   border: 3px solid rgba(80,60,30,0.6);
-  box-shadow:
-    0 8px 32px rgba(0,0,0,0.5),
-    inset 0 1px 0 rgba(255,255,255,0.05),
-    0 0 60px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+/* Japanese wooden tray/board surface */
+body.theme-japanese .container {
+  background: linear-gradient(180deg, #8b7240 0%, #7a6335 50%, #6b5530 100%);
+  border: 4px solid #5a4420;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5),
+    inset 0 2px 0 rgba(255,230,170,0.15),
+    0 2px 0 #4a3818;
+  border-radius: 8px;
 }
 
 /* Game Tabs */
@@ -88,6 +105,17 @@ body::before {
   text-shadow: 0 0 10px rgba(246,228,122,0.3);
 }
 #game-tabs button + button { border-left: 1px solid #1a3a5c; }
+/* Japanese theme tab override */
+body.theme-japanese #game-tabs {
+  background: linear-gradient(180deg, #4a3a20, #3a2c18);
+  border-color: #6b5530;
+}
+body.theme-japanese #game-tabs button { color: #a09070; }
+body.theme-japanese #game-tabs button:hover { color: #e0d8c8; background: rgba(255,240,200,0.08); }
+body.theme-japanese #game-tabs button.active {
+  color: #f0d878; background: linear-gradient(180deg, #5a4828, #4a3a20);
+}
+body.theme-japanese #game-tabs button + button { border-left-color: #5a4828; }
 
 /* Game Container */
 #game-container {
@@ -176,6 +204,10 @@ function switchGame(name) {
   // Update tabs
   document.querySelectorAll('#game-tabs button').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
+
+  // Switch table theme
+  const theme = name === 'shogi' ? 'theme-japanese' : 'theme-western';
+  document.body.className = theme;
 
   // Init new game
   currentGame = name;
