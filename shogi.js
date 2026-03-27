@@ -1153,6 +1153,11 @@ const ShogiGame = (function() {
         overlay.appendChild(p);
       }
     }
+    const retryBtn = document.createElement('button');
+    retryBtn.className = 'game-retry-btn';
+    retryBtn.textContent = '🔄 もう一度';
+    retryBtn.onclick = () => resetGame();
+    overlay.appendChild(retryBtn);
   }
 
   // ===== HTML & CSS =====
