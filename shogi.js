@@ -1068,7 +1068,13 @@ const ShogiGame = (function() {
         if (selectedHand && selectedHand.owner === owner && selectedHand.piece === type) {
           pieceEl.classList.add('shogi-hand-selected');
         }
-        pieceEl.textContent = getHandKanji(type) + (count > 1 ? '×' + count : '');
+        pieceEl.textContent = getHandKanji(type);
+        if (count > 1) {
+          const badge = document.createElement('span');
+          badge.className = 'shogi-hand-count';
+          badge.textContent = count;
+          pieceEl.appendChild(badge);
+        }
         pieceEl.onclick = () => handleHandClick(owner, type);
         handEl.appendChild(pieceEl);
       }
@@ -1247,29 +1253,48 @@ const ShogiGame = (function() {
       }
       /* Hand pieces area */
       .shogi-hand-area {
-        display: flex; align-items: center; gap: 6px; padding: 8px 12px;
-        background: #2a1f0e; border-radius: 8px; margin: 6px 0;
-        min-height: 40px; flex-wrap: wrap; max-width: 576px;
-        border: 1px solid #8b6914;
+        display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+        background: linear-gradient(135deg, #3d2e14, #2a1f0e);
+        border-radius: 8px; margin: 8px 0;
+        min-height: 48px; flex-wrap: wrap; max-width: 580px;
+        border: 1.5px solid #a07a2e;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
       }
       .shogi-hand-label {
-        font-size: 0.8rem; color: #c9a84c; margin-right: 4px; white-space: nowrap;
+        font-size: 0.85rem; color: #e8c868; margin-right: 6px; white-space: nowrap;
+        font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
       }
       .shogi-hand-piece {
-        font-size: 16px; cursor: pointer; padding: 2px 6px; border-radius: 4px;
+        font-size: 20px; cursor: pointer; border-radius: 4px;
         font-family: 'Yu Mincho', 'Hiragino Mincho ProN', 'MS Mincho', serif;
-        color: #1a1a1a; background: transparent;
-        transition: all 0.2s; font-weight: bold;
-        user-select: none; display: inline-flex; align-items: center; gap: 1px;
-        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 33'%3E%3Cpath d='M15 1.5 L28 10 L26 31.5 L4 31.5 L2 10 Z' fill='%23f5deb3' stroke='%23222' stroke-width='0.8'/%3E%3C/svg%3E") no-repeat left 2px center/24px 28px;
-        padding-left: 28px; min-height: 32px;
+        color: #2a1a00; font-weight: bold;
+        transition: all 0.15s; user-select: none;
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 38px; height: 42px; padding-top: 4px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 38 42'%3E%3Cpath d='M19 2 L36 12 L34 40 L4 40 L2 12 Z' fill='%23f5deb3' stroke='%23876520' stroke-width='1'/%3E%3C/svg%3E") no-repeat center/contain;
+        filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.4));
+        position: relative;
       }
-      .shogi-hand-piece:hover { background: #f6e47a; }
+      .shogi-hand-piece .shogi-hand-count {
+        position: absolute; bottom: -2px; right: -4px;
+        font-size: 11px; font-family: 'Segoe UI', sans-serif;
+        background: #c0392b; color: #fff; border-radius: 50%;
+        width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+        font-weight: bold; line-height: 1;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      }
+      .shogi-hand-piece:hover {
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 38 42'%3E%3Cpath d='M19 2 L36 12 L34 40 L4 40 L2 12 Z' fill='%23ffe8a0' stroke='%23c9a020' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat center/contain;
+        transform: scale(1.1);
+        filter: drop-shadow(1px 2px 4px rgba(0,0,0,0.5));
+      }
       .shogi-hand-piece.shogi-hand-selected {
-        background: #f6e47a; box-shadow: 0 0 8px 2px rgba(246,228,122,0.8);
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 38 42'%3E%3Cpath d='M19 2 L36 12 L34 40 L4 40 L2 12 Z' fill='%23f6e47a' stroke='%23d4a800' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat center/contain;
+        transform: scale(1.15);
+        filter: drop-shadow(0 0 8px rgba(246,228,122,0.8));
       }
       .shogi-hand-empty {
-        font-size: 0.8rem; color: #888; font-style: italic;
+        font-size: 0.85rem; color: #997a3e; font-style: italic;
       }
       /* Mode buttons */
       #shogi-mode-selector button {
