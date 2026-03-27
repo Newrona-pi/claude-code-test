@@ -80,6 +80,7 @@ const ChessGame = (function() {
     enPassantTarget = null;
     gameOver = false;
     cpuThinking = false;
+    removeGameResultOverlay();
     stopTimer();
     timerStarted = false;
     whiteByoyomi = false;
@@ -161,6 +162,7 @@ const ChessGame = (function() {
             const statusEl = el('chess-status');
             statusEl.textContent = '\u6642\u9593\u5207\u308C\uFF01 \u9ED2\u306E\u52DD\u3061\uFF01';
             statusEl.style.background = '#8b0000';
+            showGameResult('\u9ED2\u306E\u52DD\u3061\uFF01', true);
           }
         }
       } else {
@@ -176,6 +178,7 @@ const ChessGame = (function() {
             const statusEl = el('chess-status');
             statusEl.textContent = '\u6642\u9593\u5207\u308C\uFF01 \u767D\u306E\u52DD\u3061\uFF01';
             statusEl.style.background = '#8b0000';
+            showGameResult('\u767D\u306E\u52DD\u3061\uFF01', true);
           }
         }
       }
@@ -738,11 +741,14 @@ const ChessGame = (function() {
       stopTimer();
       updateTimerDisplay();
       if (inCheck) {
-        statusEl.textContent = '\u30C1\u30A7\u30C3\u30AF\u30E1\u30A4\u30C8\uFF01 ' + (turn === 'w' ? '\u9ED2' : '\u767D') + '\u306E\u52DD\u3061\uFF01';
+        const winner = (turn === 'w' ? '\u9ED2' : '\u767D');
+        statusEl.textContent = '\u30C1\u30A7\u30C3\u30AF\u30E1\u30A4\u30C8\uFF01 ' + winner + '\u306E\u52DD\u3061\uFF01';
         statusEl.style.background = '#8b0000';
+        showGameResult(winner + '\u306E\u52DD\u3061\uFF01', true);
       } else {
         statusEl.textContent = '\u30B9\u30C6\u30A4\u30EB\u30E1\u30A4\u30C8\uFF08\u5F15\u304D\u5206\u3051\uFF09';
         statusEl.style.background = '#555';
+        showGameResult('\u5F15\u304D\u5206\u3051', false);
       }
     } else if (inCheck) {
       statusEl.textContent = name + '\u306E\u756A\u3067\u3059\uFF08\u30C1\u30A7\u30C3\u30AF\uFF01\uFF09';
@@ -834,6 +840,42 @@ const ChessGame = (function() {
       selected = null;
     }
     render();
+  }
+
+  function removeGameResultOverlay() {
+    const wrapper = container.querySelector('.board-wrapper');
+    if (wrapper) {
+      const existing = wrapper.querySelector('.game-result-overlay');
+      if (existing) existing.remove();
+    }
+  }
+
+  function showGameResult(text, isWin) {
+    const wrapper = container.querySelector('.board-wrapper');
+    if (!wrapper) return;
+    removeGameResultOverlay();
+    const overlay = document.createElement('div');
+    overlay.className = 'game-result-overlay';
+    const textEl = document.createElement('div');
+    textEl.className = 'game-result-text ' + (isWin ? 'win' : 'draw');
+    textEl.textContent = text;
+    overlay.appendChild(textEl);
+    wrapper.appendChild(overlay);
+    if (isWin) {
+      const colors = ['#f6e47a','#e74c3c','#3498db','#2ecc71','#e67e22','#9b59b6','#1abc9c','#f39c12'];
+      for (let i = 0; i < 30; i++) {
+        const p = document.createElement('div');
+        p.className = 'confetti-particle';
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.left = Math.random() * 100 + '%';
+        p.style.top = Math.random() * 100 + '%';
+        p.style.setProperty('--tx', (Math.random() * 200 - 100) + 'px');
+        p.style.setProperty('--ty', (Math.random() * 200 + 50) + 'px');
+        p.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+        p.style.setProperty('--duration', (1 + Math.random() * 1.5) + 's');
+        overlay.appendChild(p);
+      }
+    }
   }
 
   function buildHTML() {

@@ -592,6 +592,7 @@ const ShogiGame = (function() {
     handGote = {};
     gameOver = false;
     cpuThinking = false;
+    removeGameResultOverlay();
     stopTimer();
     timerStarted = false;
     senteByoyomi = false;
@@ -671,6 +672,7 @@ const ShogiGame = (function() {
             const statusEl = el('shogi-status');
             statusEl.textContent = '時間切れ！ 後手の勝ち！';
             statusEl.style.background = '#8b0000';
+            showGameResult('後手の勝ち！', true);
           }
         }
       } else {
@@ -686,6 +688,7 @@ const ShogiGame = (function() {
             const statusEl = el('shogi-status');
             statusEl.textContent = '時間切れ！ 先手の勝ち！';
             statusEl.style.background = '#8b0000';
+            showGameResult('先手の勝ち！', true);
           }
         }
       }
@@ -881,11 +884,14 @@ const ShogiGame = (function() {
       stopTimer();
       updateTimerDisplay();
       if (inCheck) {
-        statusEl.textContent = '詰み！ ' + (turn === 'sente' ? '△後手' : '▲先手') + 'の勝ち！';
+        const winner = (turn === 'sente' ? '△後手' : '▲先手');
+        statusEl.textContent = '詰み！ ' + winner + 'の勝ち！';
         statusEl.style.background = '#8b0000';
+        showGameResult(winner + 'の勝ち！', true);
       } else {
         statusEl.textContent = '千日手（引き分け）';
         statusEl.style.background = '#555';
+        showGameResult('引き分け', false);
       }
     } else if (inCheck) {
       statusEl.textContent = name + 'の番です（王手！）';
@@ -1084,6 +1090,42 @@ const ShogiGame = (function() {
       none.className = 'shogi-hand-empty';
       none.textContent = 'なし';
       handEl.appendChild(none);
+    }
+  }
+
+  function removeGameResultOverlay() {
+    const wrapper = container.querySelector('.shogi-board-wrapper');
+    if (wrapper) {
+      const existing = wrapper.querySelector('.game-result-overlay');
+      if (existing) existing.remove();
+    }
+  }
+
+  function showGameResult(text, isWin) {
+    const wrapper = container.querySelector('.shogi-board-wrapper');
+    if (!wrapper) return;
+    removeGameResultOverlay();
+    const overlay = document.createElement('div');
+    overlay.className = 'game-result-overlay';
+    const textEl = document.createElement('div');
+    textEl.className = 'game-result-text ' + (isWin ? 'win' : 'draw');
+    textEl.textContent = text;
+    overlay.appendChild(textEl);
+    wrapper.appendChild(overlay);
+    if (isWin) {
+      const colors = ['#f6e47a','#e74c3c','#3498db','#2ecc71','#e67e22','#9b59b6','#1abc9c','#f39c12'];
+      for (let i = 0; i < 30; i++) {
+        const p = document.createElement('div');
+        p.className = 'confetti-particle';
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.left = Math.random() * 100 + '%';
+        p.style.top = Math.random() * 100 + '%';
+        p.style.setProperty('--tx', (Math.random() * 200 - 100) + 'px');
+        p.style.setProperty('--ty', (Math.random() * 200 + 50) + 'px');
+        p.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+        p.style.setProperty('--duration', (1 + Math.random() * 1.5) + 's');
+        overlay.appendChild(p);
+      }
     }
   }
 
