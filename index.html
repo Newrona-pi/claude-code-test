@@ -21,7 +21,7 @@ h1 { font-size: 1.8rem; margin-bottom: 12px; color: #e0e0e0; letter-spacing: 2px
   margin-bottom: 14px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;
 }
 #mode-selector button {
-  padding: 6px 16px; font-size: 0.9rem;
+  padding: 5px 12px; font-size: 0.85rem;
   background: #0f3460; color: #e0e0e0; border: 2px solid transparent; border-radius: 6px;
   cursor: pointer; transition: all 0.2s;
 }
@@ -110,9 +110,11 @@ h1 { font-size: 1.8rem; margin-bottom: 12px; color: #e0e0e0; letter-spacing: 2px
   <h1>♔ チェス ♚</h1>
   <div id="mode-selector">
     <button onclick="setMode('pvp')" id="btn-pvp">対人戦</button>
+    <button onclick="setMode('cpu-beginner')" id="btn-cpu-beginner">CPU（入門）</button>
     <button onclick="setMode('cpu-easy')" id="btn-cpu-easy">CPU（初級）</button>
     <button onclick="setMode('cpu-medium')" id="btn-cpu-medium">CPU（中級）</button>
     <button onclick="setMode('cpu-hard')" id="btn-cpu-hard">CPU（上級）</button>
+    <button onclick="setMode('cpu-expert')" id="btn-cpu-expert">CPU（最強）</button>
   </div>
   <div id="status">白の番です</div>
   <div class="board-wrapper">
@@ -153,7 +155,7 @@ const INITIAL = [
 let board, turn, selected, history, capturedWhite, capturedBlack;
 let castlingRights, enPassantTarget, gameOver;
 let cpuThinking = false;
-let gameMode = 'cpu-medium'; // 'pvp', 'cpu-easy', 'cpu-medium', 'cpu-hard'
+let gameMode = 'cpu-medium'; // 'pvp', 'cpu-beginner', 'cpu-easy', 'cpu-medium', 'cpu-hard', 'cpu-expert'
 
 function isWhite(p) { return p && p === p.toUpperCase(); }
 function isBlack(p) { return p && p === p.toLowerCase(); }
@@ -518,23 +520,36 @@ function minimax(b, depth, alpha, beta, maximizing, cr, ep) {
 }
 
 function getCpuMove() {
-  const depthMap = { 'cpu-easy': 1, 'cpu-medium': 3, 'cpu-hard': 4 };
+  const depthMap = { 'cpu-beginner': 1, 'cpu-easy': 1, 'cpu-medium': 3, 'cpu-hard': 4, 'cpu-expert': 5 };
   const depth = depthMap[gameMode] || 3;
   const color = turn;
   const maximizing = color === 'w';
   const moves = getLegalMovesForState(board, color, castlingRights, enPassantTarget);
   if (moves.length === 0) return null;
 
+  // Beginner mode: mostly random moves
+  if (gameMode === 'cpu-beginner') {
+    // 70% chance of a completely random move, 30% picks from top evaluated moves
+    if (Math.random() < 0.7) {
+      return moves[Math.floor(Math.random() * moves.length)];
+    }
+    const scored = moves.map(([fr, fc, tr, tc]) => {
+      const state = simulateMove(board, fr, fc, tr, tc, enPassantTarget, castlingRights);
+      return { move: [fr, fc, tr, tc], score: evaluate(state.board) + (Math.random() - 0.5) * 300 };
+    });
+    scored.sort((a, b) => maximizing ? b.score - a.score : a.score - b.score);
+    const topN = Math.min(5, scored.length);
+    return scored[Math.floor(Math.random() * topN)].move;
+  }
+
   // Easy mode: add randomness
   if (gameMode === 'cpu-easy') {
     const scored = moves.map(([fr, fc, tr, tc]) => {
       const state = simulateMove(board, fr, fc, tr, tc, enPassantTarget, castlingRights);
       const ev = evaluate(state.board);
-      // Add random noise for easy mode
       return { move: [fr, fc, tr, tc], score: ev + (Math.random() - 0.5) * 200 };
     });
     scored.sort((a, b) => maximizing ? b.score - a.score : a.score - b.score);
-    // Pick from top 3 randomly
     const topN = Math.min(3, scored.length);
     const pick = scored[Math.floor(Math.random() * topN)];
     return pick.move;
