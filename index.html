@@ -197,6 +197,7 @@ h1 { font-size: 1.8rem; margin-bottom: 12px; color: #e0e0e0; letter-spacing: 2px
       <div class="timer-byoyomi" id="timer-black-byoyomi"></div>
     </div>
   </div>
+  <button id="start-btn" style="display:none; margin: 0 auto 10px; padding:10px 40px; font-size:1.1rem; background:#2e7d32; color:#fff; border:none; border-radius:8px; cursor:pointer; letter-spacing:2px; transition:background 0.2s;" onmouseover="this.style.background='#388e3c'" onmouseout="this.style.background='#2e7d32'" onclick="startGame()">▶ 開始</button>
   <div id="status">白の番です</div>
   <div class="board-wrapper">
     <div class="coords-col" id="coords-col"></div>
@@ -243,6 +244,7 @@ let whiteTime = 0, blackTime = 0;
 let whiteByoyomi = false, blackByoyomi = false;
 let timerInterval = null;
 let timerStarted = false;
+let gameStarted = true; // false when waiting for start button
 
 function isWhite(p) { return p && p === p.toUpperCase(); }
 function isBlack(p) { return p && p === p.toLowerCase(); }
@@ -263,6 +265,13 @@ function setMode(mode) {
     timeMode = 'none';
   }
   resetGame();
+}
+
+function startGame() {
+  gameStarted = true;
+  document.getElementById('start-btn').style.display = 'none';
+  startTimer();
+  updateTimerDisplay();
 }
 
 function setTimeMode(mode) {
@@ -288,12 +297,17 @@ function resetGame() {
   whiteByoyomi = false;
   blackByoyomi = false;
   initTimers();
+  const startBtn = document.getElementById('start-btn');
+  if (timeMode !== 'none' && gameMode === 'pvp') {
+    gameStarted = false;
+    startBtn.style.display = 'block';
+  } else {
+    gameStarted = true;
+    startBtn.style.display = 'none';
+  }
   render();
   updateStatus();
   updateTimerDisplay();
-  if (timeMode !== 'none' && gameMode === 'pvp') {
-    startTimer();
-  }
 }
 
 function initTimers() {
@@ -1039,7 +1053,7 @@ function render() {
 }
 
 async function handleClick(r, c) {
-  if (gameOver || cpuThinking) return;
+  if (gameOver || cpuThinking || !gameStarted) return;
   if (isCpuTurn()) return;
 
   if (selected) {
