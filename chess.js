@@ -4,6 +4,7 @@ const ChessGame = (function() {
   let board, turn, selected, history, capturedWhite, capturedBlack;
   let castlingRights, enPassantTarget, gameOver;
   let cpuThinking = false;
+  let makingMove = false;
   let animateNextRender = false;
   let gameMode = 'cpu-medium';
   let timeMode = 'none';
@@ -848,13 +849,15 @@ const ChessGame = (function() {
   }
 
   async function handleClick(r, c) {
-    if (gameOver || cpuThinking || !gameStarted) return;
+    if (gameOver || cpuThinking || makingMove || !gameStarted) return;
     if (isCpuTurn()) return;
 
     if (selected) {
       const legalMoves = getLegalMoves(selected[0], selected[1]);
       if (legalMoves.some(([mr, mc]) => mr === r && mc === c)) {
+        makingMove = true;
         await makeMove(selected[0], selected[1], r, c, false);
+        makingMove = false;
         return;
       }
     }

@@ -5,6 +5,7 @@ const ShogiGame = (function() {
   let handSente, handGote; // captured pieces in hand
   let selectedHand = null; // { player: 'sente'|'gote', piece: string }
   let cpuThinking = false;
+  let makingMove = false;
   let animateNextRender = false;
   let gameMode = 'cpu-medium';
   let timeMode = 'none';
@@ -927,14 +928,16 @@ const ShogiGame = (function() {
   // ===== Click Handling =====
 
   async function handleBoardClick(r, c) {
-    if (gameOver || cpuThinking || !gameStarted) return;
+    if (gameOver || cpuThinking || makingMove || !gameStarted) return;
     if (isCpuTurn()) return;
 
     // If we have a hand piece selected, try to drop it
     if (selectedHand) {
       const drops = getLegalDrops(selectedHand.owner, selectedHand.piece);
       if (drops.some(([dr, dc]) => dr === r && dc === c)) {
+        makingMove = true;
         await makeDrop(r, c, selectedHand.owner, selectedHand.piece);
+        makingMove = false;
         return;
       }
       selectedHand = null;
@@ -948,6 +951,7 @@ const ShogiGame = (function() {
       const legal = getLegalMoves(selected[0], selected[1]);
       const matchingMoves = legal.filter(([mr, mc]) => mr === r && mc === c);
       if (matchingMoves.length > 0) {
+        makingMove = true;
         const piece = board[selected[0]][selected[1]];
         const hasPromoteOption = matchingMoves.some(([,,p]) => p);
         const hasNonPromoteOption = matchingMoves.some(([,,p]) => !p);
@@ -955,13 +959,13 @@ const ShogiGame = (function() {
         if (mustPromote(piece, r)) {
           await makeMove(selected[0], selected[1], r, c, true, false);
         } else if (hasPromoteOption && hasNonPromoteOption) {
-          // Ask user
-          await makeMove(selected[0], selected[1], r, c, false, false); // will trigger dialog internally
+          await makeMove(selected[0], selected[1], r, c, false, false);
         } else if (hasPromoteOption) {
           await makeMove(selected[0], selected[1], r, c, true, false);
         } else {
           await makeMove(selected[0], selected[1], r, c, false, false);
         }
+        makingMove = false;
         return;
       }
     }
@@ -977,7 +981,7 @@ const ShogiGame = (function() {
   }
 
   function handleHandClick(owner, type) {
-    if (gameOver || cpuThinking || !gameStarted) return;
+    if (gameOver || cpuThinking || makingMove || !gameStarted) return;
     if (isCpuTurn()) return;
     if (owner !== turn) return;
 

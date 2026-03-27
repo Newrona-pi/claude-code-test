@@ -215,18 +215,50 @@ body.theme-japanese #game-tabs button + button { border-left-color: #5a4828; }
   0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
   100% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)); opacity: 0; }
 }
-#mute-btn {
-  position: fixed; top: 20px; right: 20px;
-  font-size: 1.5rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15);
-  color: #e0e0e0; border-radius: 50%; width: 44px; height: 44px;
-  cursor: pointer; transition: all 0.2s; z-index: 100;
-  display: flex; align-items: center; justify-content: center;
+#sound-controls {
+  position: fixed; top: 16px; right: 16px; z-index: 100;
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 24px; padding: 6px 14px;
+  backdrop-filter: blur(4px);
 }
-#mute-btn:hover { background: rgba(0,0,0,0.5); }
+#mute-btn {
+  font-size: 1.3rem; background: none; border: none;
+  color: #e0e0e0; cursor: pointer; padding: 0; line-height: 1;
+  transition: transform 0.15s;
+}
+#mute-btn:hover { transform: scale(1.15); }
+#volume-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 80px; height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,0.2); outline: none;
+  cursor: pointer;
+}
+#volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #f6e47a; cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+#volume-slider::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #f6e47a; cursor: pointer; border: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+#retry-btn {
+  font-size: 0.8rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  color: #e0e0e0; border-radius: 14px; padding: 4px 12px;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+#retry-btn:hover { background: rgba(255,255,255,0.2); }
 </style>
 </head>
 <body>
-<button id="mute-btn" onclick="toggleMute()">🔊</button>
+<div id="sound-controls">
+  <button id="mute-btn" onclick="toggleMute()">🔊</button>
+  <input type="range" id="volume-slider" min="0" max="100" value="50" oninput="setVolume(this.value)">
+  <button id="retry-btn" onclick="retryGame()">🔄 もう一度</button>
+</div>
 <div class="container">
   <div id="game-tabs">
     <button onclick="switchGame('chess')" id="tab-chess">♔ チェス</button>
@@ -243,10 +275,43 @@ body.theme-japanese #game-tabs button + button { border-left-color: #5a4828; }
 // Sound system — uses audio files from 効果音ラボ (https://soundeffect-lab.info/)
 // License: free for commercial use, no credit required
 let soundMuted = false;
+let masterVolume = 0.5;
 
 function toggleMute() {
   soundMuted = !soundMuted;
   document.getElementById('mute-btn').textContent = soundMuted ? '🔇' : '🔊';
+  document.getElementById('volume-slider').style.opacity = soundMuted ? '0.3' : '1';
+}
+
+function setVolume(val) {
+  masterVolume = val / 100;
+  if (masterVolume === 0) {
+    soundMuted = true;
+    document.getElementById('mute-btn').textContent = '🔇';
+  } else if (soundMuted) {
+    soundMuted = false;
+    document.getElementById('mute-btn').textContent = '🔊';
+  }
+  applyVolume();
+}
+
+function applyVolume() {
+  const scales = {
+    chessMove: 1.0, shogiMove: 1.2, goStone: 1.0,
+    capture: 0.8, check: 0.6, fanfare: 0.8, correct: 0.8, draw: 0.6
+  };
+  for (const [key, sound] of Object.entries(soundFiles)) {
+    sound.volume = masterVolume * (scales[key] || 1.0);
+  }
+}
+
+function retryGame() {
+  if (currentGame && games[currentGame]) {
+    const container = document.getElementById('game-container');
+    games[currentGame].destroy();
+    container.innerHTML = '';
+    games[currentGame].init(container);
+  }
 }
 
 // Preload audio files
@@ -260,15 +325,8 @@ const soundFiles = {
   correct:    new Audio('sounds/correct.mp3'),       // ハープ正解音 → 勝利(軽め)
   draw:       new Audio('sounds/draw.mp3'),          // キャンセル音 → 引き分け
 };
-// Set volumes
-soundFiles.chessMove.volume = 0.5;
-soundFiles.shogiMove.volume = 0.6;
-soundFiles.goStone.volume = 0.5;
-soundFiles.capture.volume = 0.4;
-soundFiles.check.volume = 0.3;
-soundFiles.fanfare.volume = 0.4;
-soundFiles.correct.volume = 0.4;
-soundFiles.draw.volume = 0.3;
+// Apply initial volume
+applyVolume();
 
 function _playSound(sound) {
   if (soundMuted) return;

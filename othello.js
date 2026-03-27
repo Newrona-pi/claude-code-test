@@ -3,6 +3,7 @@ const OthelloGame = (function() {
   let container = null;
   let board, turn, history, gameOver;
   let cpuThinking = false;
+  let makingMove = false;
   let gameMode = 'cpu-medium';
   let timeMode = 'none';
   let blackTime = 0, whiteTime = 0;
@@ -590,10 +591,12 @@ const OthelloGame = (function() {
           sq.classList.add('othello-legal-move');
         }
 
-        if (!gameOver && !cpuThinking && board[r][c] === EMPTY) {
+        if (!gameOver && !cpuThinking && !makingMove && board[r][c] === EMPTY) {
           sq.onclick = () => {
-            if (!gameStarted) return;
+            if (!gameStarted || makingMove || cpuThinking || isCpuTurn()) return;
+            makingMove = true;
             makeMove(r, c);
+            makingMove = false;
           };
         }
 
@@ -638,10 +641,12 @@ const OthelloGame = (function() {
           sq.classList.add('othello-legal-move');
         }
 
-        if (!gameOver && !cpuThinking && board[r][c] === EMPTY) {
+        if (!gameOver && !cpuThinking && !makingMove && board[r][c] === EMPTY) {
           sq.onclick = () => {
-            if (!gameStarted) return;
+            if (!gameStarted || makingMove || cpuThinking || isCpuTurn()) return;
+            makingMove = true;
             makeMove(r, c);
+            makingMove = false;
           };
         }
 
