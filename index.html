@@ -109,6 +109,34 @@ h1 { font-size: 1.8rem; margin-bottom: 12px; color: #e0e0e0; letter-spacing: 2px
   60% { box-shadow: inset 0 0 12px 4px rgba(255,0,0,0.4); }
   100% { box-shadow: inset 0 0 16px 4px rgba(255,0,0,0.6); }
 }
+#time-selector {
+  margin-bottom: 10px; display: none; justify-content: center; gap: 6px; flex-wrap: wrap;
+}
+#time-selector button {
+  padding: 4px 10px; font-size: 0.8rem;
+  background: #1a3a5c; color: #e0e0e0; border: 2px solid transparent; border-radius: 6px;
+  cursor: pointer; transition: all 0.2s;
+}
+#time-selector button:hover { background: #1a4a8a; }
+#time-selector button.active { border-color: #f6e47a; background: #1a4a8a; }
+#timers {
+  display: none; justify-content: center; gap: 20px; margin-bottom: 10px;
+  font-size: 1.1rem; font-family: 'Consolas', 'Courier New', monospace;
+}
+.timer-box {
+  padding: 6px 16px; border-radius: 8px; min-width: 120px; text-align: center;
+}
+.timer-box.white-timer { background: #ddd; color: #222; }
+.timer-box.black-timer { background: #333; color: #eee; }
+.timer-box.active-timer { box-shadow: 0 0 8px 2px rgba(246,228,122,0.6); }
+.timer-box.low-time { animation: timerWarn 0.5s infinite; }
+@keyframes timerWarn {
+  0%,100% { box-shadow: 0 0 8px 2px rgba(255,0,0,0.6); }
+  50% { box-shadow: 0 0 16px 4px rgba(255,0,0,0.9); }
+}
+.timer-label { font-size: 0.7rem; opacity: 0.7; }
+.timer-value { font-size: 1.3rem; font-weight: bold; }
+.timer-byoyomi { font-size: 0.65rem; color: #f6e47a; }
 .buttons { margin-top: 16px; }
 .buttons button {
   padding: 8px 20px; margin: 0 6px; font-size: 0.95rem;
@@ -151,6 +179,24 @@ h1 { font-size: 1.8rem; margin-bottom: 12px; color: #e0e0e0; letter-spacing: 2px
     <button onclick="setMode('cpu-hard')" id="btn-cpu-hard">上級</button>
     <button onclick="setMode('cpu-expert')" id="btn-cpu-expert">最強</button>
   </div>
+  <div id="time-selector">
+    <button onclick="setTimeMode('none')" id="btn-time-none">制限なし</button>
+    <button onclick="setTimeMode('30s')" id="btn-time-30s">30秒</button>
+    <button onclick="setTimeMode('60s')" id="btn-time-60s">60秒</button>
+    <button onclick="setTimeMode('5m15s')" id="btn-time-5m15s">5分+15秒</button>
+  </div>
+  <div id="timers">
+    <div class="timer-box white-timer" id="timer-white">
+      <div class="timer-label">白</div>
+      <div class="timer-value" id="timer-white-value">--:--</div>
+      <div class="timer-byoyomi" id="timer-white-byoyomi"></div>
+    </div>
+    <div class="timer-box black-timer" id="timer-black">
+      <div class="timer-label">黒</div>
+      <div class="timer-value" id="timer-black-value">--:--</div>
+      <div class="timer-byoyomi" id="timer-black-byoyomi"></div>
+    </div>
+  </div>
   <div id="status">白の番です</div>
   <div class="board-wrapper">
     <div class="coords-col" id="coords-col"></div>
@@ -191,7 +237,12 @@ let board, turn, selected, history, capturedWhite, capturedBlack;
 let castlingRights, enPassantTarget, gameOver;
 let cpuThinking = false;
 let animateNextRender = false;
-let gameMode = 'cpu-medium'; // 'pvp', 'cpu-beginner', 'cpu-easy', 'cpu-medium', 'cpu-hard', 'cpu-expert'
+let gameMode = 'cpu-medium';
+let timeMode = 'none'; // 'none', '30s', '60s', '5m15s'
+let whiteTime = 0, blackTime = 0;
+let whiteByoyomi = false, blackByoyomi = false;
+let timerInterval = null;
+let timerStarted = false;
 
 function isWhite(p) { return p && p === p.toUpperCase(); }
 function isBlack(p) { return p && p === p.toLowerCase(); }
@@ -204,6 +255,20 @@ function setMode(mode) {
   gameMode = mode;
   document.querySelectorAll('#mode-selector button').forEach(b => b.classList.remove('active'));
   document.getElementById('btn-' + mode).classList.add('active');
+  const timeSel = document.getElementById('time-selector');
+  if (mode === 'pvp') {
+    timeSel.style.display = 'flex';
+  } else {
+    timeSel.style.display = 'none';
+    timeMode = 'none';
+  }
+  resetGame();
+}
+
+function setTimeMode(mode) {
+  timeMode = mode;
+  document.querySelectorAll('#time-selector button').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-time-' + mode).classList.add('active');
   resetGame();
 }
 
@@ -218,8 +283,124 @@ function resetGame() {
   enPassantTarget = null;
   gameOver = false;
   cpuThinking = false;
+  stopTimer();
+  timerStarted = false;
+  whiteByoyomi = false;
+  blackByoyomi = false;
+  initTimers();
   render();
   updateStatus();
+  updateTimerDisplay();
+}
+
+function initTimers() {
+  const timersEl = document.getElementById('timers');
+  if (timeMode === 'none' || gameMode !== 'pvp') {
+    timersEl.style.display = 'none';
+    return;
+  }
+  timersEl.style.display = 'flex';
+  if (timeMode === '30s') {
+    whiteTime = 30; blackTime = 30;
+  } else if (timeMode === '60s') {
+    whiteTime = 60; blackTime = 60;
+  } else if (timeMode === '5m15s') {
+    whiteTime = 300; blackTime = 300;
+  }
+}
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0');
+}
+
+function updateTimerDisplay() {
+  const timersEl = document.getElementById('timers');
+  if (timeMode === 'none' || gameMode !== 'pvp') {
+    timersEl.style.display = 'none';
+    return;
+  }
+  document.getElementById('timer-white-value').textContent = formatTime(whiteTime);
+  document.getElementById('timer-black-value').textContent = formatTime(blackTime);
+
+  const wBox = document.getElementById('timer-white');
+  const bBox = document.getElementById('timer-black');
+  wBox.classList.toggle('active-timer', turn === 'w' && !gameOver);
+  bBox.classList.toggle('active-timer', turn === 'b' && !gameOver);
+  wBox.classList.toggle('low-time', whiteTime <= 10 && whiteTime > 0 && !gameOver);
+  bBox.classList.toggle('low-time', blackTime <= 10 && blackTime > 0 && !gameOver);
+
+  const wByoEl = document.getElementById('timer-white-byoyomi');
+  const bByoEl = document.getElementById('timer-black-byoyomi');
+  wByoEl.textContent = whiteByoyomi ? '秒読み' : '';
+  bByoEl.textContent = blackByoyomi ? '秒読み' : '';
+}
+
+function startTimer() {
+  stopTimer();
+  if (timeMode === 'none' || gameMode !== 'pvp' || gameOver) return;
+  timerStarted = true;
+  timerInterval = setInterval(() => {
+    if (gameOver) { stopTimer(); return; }
+    if (turn === 'w') {
+      whiteTime--;
+      if (whiteTime <= 0) {
+        if (timeMode === '5m15s' && !whiteByoyomi) {
+          whiteByoyomi = true;
+          whiteTime = 15;
+        } else {
+          whiteTime = 0;
+          stopTimer();
+          gameOver = true;
+          const statusEl = document.getElementById('status');
+          statusEl.textContent = '時間切れ！ 黒の勝ち！';
+          statusEl.style.background = '#8b0000';
+        }
+      }
+    } else {
+      blackTime--;
+      if (blackTime <= 0) {
+        if (timeMode === '5m15s' && !blackByoyomi) {
+          blackByoyomi = true;
+          blackTime = 15;
+        } else {
+          blackTime = 0;
+          stopTimer();
+          gameOver = true;
+          const statusEl = document.getElementById('status');
+          statusEl.textContent = '時間切れ！ 白の勝ち！';
+          statusEl.style.background = '#8b0000';
+        }
+      }
+    }
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function onMoveMadeTimer() {
+  if (timeMode === 'none' || gameMode !== 'pvp') return;
+  // turn has already switched, so 'turn' is the NEXT player
+  if (timeMode === '30s') {
+    // Reset the NEXT player's time
+    if (turn === 'w') whiteTime = 30; else blackTime = 30;
+  } else if (timeMode === '60s') {
+    if (turn === 'w') whiteTime = 60; else blackTime = 60;
+  } else if (timeMode === '5m15s') {
+    // Reset byoyomi for the player who just moved
+    const justMoved = turn === 'w' ? 'b' : 'w';
+    if (justMoved === 'w' && whiteByoyomi) whiteTime = 15;
+    if (justMoved === 'b' && blackByoyomi) blackTime = 15;
+  }
+  startTimer();
+  updateTimerDisplay();
 }
 
 function getPseudoMoves(b, r, c, castling, epTarget) {
@@ -705,6 +886,19 @@ async function makeMove(fr, fc, tr, tc, isCpu) {
   render();
   updateStatus();
 
+  // Timer handling
+  if (!gameOver) {
+    if (!timerStarted && timeMode !== 'none' && gameMode === 'pvp') {
+      // Start timer on first move
+      startTimer();
+    } else {
+      onMoveMadeTimer();
+    }
+  } else {
+    stopTimer();
+  }
+  updateTimerDisplay();
+
   // Trigger CPU move
   if (!gameOver && isCpuTurn()) {
     scheduleCpuMove();
@@ -763,6 +957,8 @@ function updateStatus() {
 
   if (!hasMove) {
     gameOver = true;
+    stopTimer();
+    updateTimerDisplay();
     if (inCheck) {
       statusEl.textContent = `チェックメイト！ ${turn === 'w' ? '黒' : '白'}の勝ち！`;
       statusEl.style.background = '#8b0000';
@@ -865,6 +1061,7 @@ async function handleClick(r, c) {
 }
 
 // Init
+document.getElementById('btn-time-none').classList.add('active');
 setMode('cpu-medium');
 </script>
 </body>
