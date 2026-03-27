@@ -190,6 +190,7 @@ const INITIAL = [
 let board, turn, selected, history, capturedWhite, capturedBlack;
 let castlingRights, enPassantTarget, gameOver;
 let cpuThinking = false;
+let animateNextRender = false;
 let gameMode = 'cpu-medium'; // 'pvp', 'cpu-beginner', 'cpu-easy', 'cpu-medium', 'cpu-hard', 'cpu-expert'
 
 function isWhite(p) { return p && p === p.toUpperCase(); }
@@ -700,6 +701,7 @@ async function makeMove(fr, fc, tr, tc, isCpu) {
   history.push(histEntry);
   turn = turn === 'w' ? 'b' : 'w';
   selected = null;
+  animateNextRender = true;
   render();
   updateStatus();
 
@@ -810,8 +812,8 @@ function render() {
         const p = document.createElement('span');
         p.className = 'piece ' + (isBlack(board[r][c]) ? 'black' : 'white');
         p.textContent = PIECES[board[r][c]];
-        // Animate moved piece
-        if (lastMove && r === lastMove[2] && c === lastMove[3]) {
+        // Animate moved piece (only on the render right after a move)
+        if (animateNextRender && lastMove && r === lastMove[2] && c === lastMove[3]) {
           const dr = lastMove[0] - lastMove[2];
           const dc = lastMove[1] - lastMove[3];
           p.style.setProperty('--dx', (dc * 72) + 'px');
@@ -820,8 +822,8 @@ function render() {
           p.classList.add(wasCapture ? 'capture-anim' : 'move-anim');
           if (wasCapture) sq.classList.add('capture-flash');
         }
-        // Animate check
-        if (inCheck && kingPos && kingPos[0] === r && kingPos[1] === c) {
+        // Animate check (only on the render right after a move)
+        if (animateNextRender && inCheck && kingPos && kingPos[0] === r && kingPos[1] === c) {
           sq.classList.add('check-anim');
         }
         sq.appendChild(p);
@@ -839,6 +841,7 @@ function render() {
 
   document.getElementById('captured-white').innerHTML = capturedBlack.sort().map(p => PIECES[p]).join('');
   document.getElementById('captured-black').innerHTML = capturedWhite.sort().map(p => PIECES[p]).join('');
+  animateNextRender = false;
 }
 
 async function handleClick(r, c) {
