@@ -218,6 +218,7 @@ const OthelloGame = (function() {
             statusEl.textContent = '\u6642\u9593\u5207\u308C\uFF01 \u767D\u306E\u52DD\u3061\uFF01';
             statusEl.style.background = '#8b0000';
             showGameResult('\u767D\u306E\u52DD\u3061\uFF01', true);
+            playWinSound();
           }
         }
       } else {
@@ -234,6 +235,7 @@ const OthelloGame = (function() {
             statusEl.textContent = '\u6642\u9593\u5207\u308C\uFF01 \u9ED2\u306E\u52DD\u3061\uFF01';
             statusEl.style.background = '#8b0000';
             showGameResult('\u9ED2\u306E\u52DD\u3061\uFF01', true);
+            playWinSound();
           }
         }
       }
@@ -407,6 +409,10 @@ const OthelloGame = (function() {
     const result = applyMove(board, r, c, turn);
     board = result.board;
 
+    // Play sounds
+    playStoneSound();
+    if (result.flips.length > 0) { playCaptureSound(); }
+
     // Animate flipped stones
     renderWithAnimation(r, c, result.flips);
 
@@ -434,14 +440,17 @@ const OthelloGame = (function() {
         statusEl.textContent = '\u9ED2\u306E\u52DD\u3061\uFF01 ' + count.black + ' - ' + count.white;
         statusEl.style.background = '#2e7d32';
         showGameResult('\u9ED2\u306E\u52DD\u3061\uFF01', true);
+        playWinSound();
       } else if (count.white > count.black) {
         statusEl.textContent = '\u767D\u306E\u52DD\u3061\uFF01 ' + count.white + ' - ' + count.black;
         statusEl.style.background = '#2e7d32';
         showGameResult('\u767D\u306E\u52DD\u3061\uFF01', true);
+        playWinSound();
       } else {
         statusEl.textContent = '\u5F15\u304D\u5206\u3051\uFF01 ' + count.black + ' - ' + count.white;
         statusEl.style.background = '#b8860b';
         showGameResult('\u5F15\u304D\u5206\u3051', false);
+        playDrawSound();
       }
       render();
       updateScore();

@@ -673,6 +673,7 @@ const ShogiGame = (function() {
             statusEl.textContent = '時間切れ！ 後手の勝ち！';
             statusEl.style.background = '#8b0000';
             showGameResult('後手の勝ち！', true);
+            playWinSound();
           }
         }
       } else {
@@ -689,6 +690,7 @@ const ShogiGame = (function() {
             statusEl.textContent = '時間切れ！ 先手の勝ち！';
             statusEl.style.background = '#8b0000';
             showGameResult('先手の勝ち！', true);
+            playWinSound();
           }
         }
       }
@@ -780,6 +782,7 @@ const ShogiGame = (function() {
     selected = null;
     selectedHand = null;
     animateNextRender = true;
+    if (captured) { playCaptureSound(); } else { playMoveSound(); }
     render();
     updateStatus();
 
@@ -814,6 +817,7 @@ const ShogiGame = (function() {
     selected = null;
     selectedHand = null;
     animateNextRender = true;
+    playDropSound();
     render();
     updateStatus();
 
@@ -888,14 +892,17 @@ const ShogiGame = (function() {
         statusEl.textContent = '詰み！ ' + winner + 'の勝ち！';
         statusEl.style.background = '#8b0000';
         showGameResult(winner + 'の勝ち！', true);
+        playWinSound();
       } else {
         statusEl.textContent = '千日手（引き分け）';
         statusEl.style.background = '#555';
         showGameResult('引き分け', false);
+        playDrawSound();
       }
     } else if (inCheck) {
       statusEl.textContent = name + 'の番です（王手！）';
       statusEl.style.background = '#8b4513';
+      playCheckSound();
     } else {
       statusEl.textContent = name + 'の番です';
       statusEl.style.background = '#16213e';

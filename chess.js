@@ -163,6 +163,7 @@ const ChessGame = (function() {
             statusEl.textContent = '\u6642\u9593\u5207\u308C\uFF01 \u9ED2\u306E\u52DD\u3061\uFF01';
             statusEl.style.background = '#8b0000';
             showGameResult('\u9ED2\u306E\u52DD\u3061\uFF01', true);
+            playWinSound();
           }
         }
       } else {
@@ -179,6 +180,7 @@ const ChessGame = (function() {
             statusEl.textContent = '\u6642\u9593\u5207\u308C\uFF01 \u767D\u306E\u52DD\u3061\uFF01';
             statusEl.style.background = '#8b0000';
             showGameResult('\u767D\u306E\u52DD\u3061\uFF01', true);
+            playWinSound();
           }
         }
       }
@@ -672,6 +674,7 @@ const ChessGame = (function() {
     turn = turn === 'w' ? 'b' : 'w';
     selected = null;
     animateNextRender = true;
+    if (captured || epCaptured) { playCaptureSound(); } else { playMoveSound(); }
     render();
     updateStatus();
 
@@ -745,14 +748,17 @@ const ChessGame = (function() {
         statusEl.textContent = '\u30C1\u30A7\u30C3\u30AF\u30E1\u30A4\u30C8\uFF01 ' + winner + '\u306E\u52DD\u3061\uFF01';
         statusEl.style.background = '#8b0000';
         showGameResult(winner + '\u306E\u52DD\u3061\uFF01', true);
+        playWinSound();
       } else {
         statusEl.textContent = '\u30B9\u30C6\u30A4\u30EB\u30E1\u30A4\u30C8\uFF08\u5F15\u304D\u5206\u3051\uFF09';
         statusEl.style.background = '#555';
         showGameResult('\u5F15\u304D\u5206\u3051', false);
+        playDrawSound();
       }
     } else if (inCheck) {
       statusEl.textContent = name + '\u306E\u756A\u3067\u3059\uFF08\u30C1\u30A7\u30C3\u30AF\uFF01\uFF09';
       statusEl.style.background = '#8b4513';
+      playCheckSound();
     } else {
       statusEl.textContent = name + '\u306E\u756A\u3067\u3059';
       statusEl.style.background = '#16213e';
