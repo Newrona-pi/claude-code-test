@@ -552,6 +552,18 @@ const ShogiGame = (function() {
     return gameMode !== 'pvp' && turn === 'gote';
   }
 
+  function isCpuMode() { return gameMode !== 'pvp'; }
+
+  function getShogiResultText(winner) {
+    if (!isCpuMode()) return winner + 'の勝ち！';
+    return winner.includes('先手') ? 'あなたの勝ち！' : 'あなたの負け…';
+  }
+
+  function isShogiPlayerWin(winner) {
+    if (!isCpuMode()) return true;
+    return winner.includes('先手');
+  }
+
   // ===== Timer =====
 
   function setMode(mode) {
@@ -670,9 +682,10 @@ const ShogiGame = (function() {
             stopTimer();
             gameOver = true;
             const statusEl = el('shogi-status');
-            statusEl.textContent = '時間切れ！ 後手の勝ち！';
+            const rt1 = getShogiResultText('△後手');
+            statusEl.textContent = '時間切れ！ ' + rt1;
             statusEl.style.background = '#8b0000';
-            showGameResult('後手の勝ち！', true);
+            showGameResult(rt1, isShogiPlayerWin('△後手'));
             playWinSound();
           }
         }
@@ -687,9 +700,10 @@ const ShogiGame = (function() {
             stopTimer();
             gameOver = true;
             const statusEl = el('shogi-status');
-            statusEl.textContent = '時間切れ！ 先手の勝ち！';
+            const rt2 = getShogiResultText('▲先手');
+            statusEl.textContent = '時間切れ！ ' + rt2;
             statusEl.style.background = '#8b0000';
-            showGameResult('先手の勝ち！', true);
+            showGameResult(rt2, isShogiPlayerWin('▲先手'));
             playWinSound();
           }
         }
@@ -889,9 +903,10 @@ const ShogiGame = (function() {
       updateTimerDisplay();
       if (inCheck) {
         const winner = (turn === 'sente' ? '△後手' : '▲先手');
-        statusEl.textContent = '詰み！ ' + winner + 'の勝ち！';
+        const resultText = getShogiResultText(winner);
+        statusEl.textContent = '詰み！ ' + resultText;
         statusEl.style.background = '#8b0000';
-        showGameResult(winner + 'の勝ち！', true);
+        showGameResult(resultText, isShogiPlayerWin(winner));
         playWinSound();
       } else {
         statusEl.textContent = '千日手（引き分け）';

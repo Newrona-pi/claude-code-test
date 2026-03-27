@@ -215,9 +215,10 @@ const OthelloGame = (function() {
             stopTimer();
             gameOver = true;
             const statusEl = el('othello-status');
-            statusEl.textContent = '\u6642\u9593\u5207\u308C\uFF01 \u767D\u306E\u52DD\u3061\uFF01';
+            const rt1 = getOthelloResultText('\u767D');
+            statusEl.textContent = '\u6642\u9593\u5207\u308C\uFF01 ' + rt1;
             statusEl.style.background = '#8b0000';
-            showGameResult('\u767D\u306E\u52DD\u3061\uFF01', true);
+            showGameResult(rt1, isOthelloPlayerWin('\u767D'));
             playWinSound();
           }
         }
@@ -232,9 +233,10 @@ const OthelloGame = (function() {
             stopTimer();
             gameOver = true;
             const statusEl = el('othello-status');
-            statusEl.textContent = '\u6642\u9593\u5207\u308C\uFF01 \u9ED2\u306E\u52DD\u3061\uFF01';
+            const rt2 = getOthelloResultText('\u9ED2');
+            statusEl.textContent = '\u6642\u9593\u5207\u308C\uFF01 ' + rt2;
             statusEl.style.background = '#8b0000';
-            showGameResult('\u9ED2\u306E\u52DD\u3061\uFF01', true);
+            showGameResult(rt2, isOthelloPlayerWin('\u9ED2'));
             playWinSound();
           }
         }
@@ -395,6 +397,19 @@ const OthelloGame = (function() {
     return gameMode !== 'pvp' && turn === WHITE;
   }
 
+  function isCpuMode() { return gameMode !== 'pvp'; }
+
+  // オセロ: プレイヤー=黒、CPU=白
+  function getOthelloResultText(winner) {
+    if (!isCpuMode()) return winner + '\u306E\u52DD\u3061\uFF01';
+    return winner === '\u9ED2' ? '\u3042\u306A\u305F\u306E\u52DD\u3061\uFF01' : '\u3042\u306A\u305F\u306E\u8CA0\u3051\u2026';
+  }
+
+  function isOthelloPlayerWin(winner) {
+    if (!isCpuMode()) return true;
+    return winner === '\u9ED2';
+  }
+
   // --- Game logic ---
   function makeMove(r, c) {
     if (gameOver || !gameStarted) return;
@@ -437,14 +452,16 @@ const OthelloGame = (function() {
       const count = countStones(board);
       const statusEl = el('othello-status');
       if (count.black > count.white) {
-        statusEl.textContent = '\u9ED2\u306E\u52DD\u3061\uFF01 ' + count.black + ' - ' + count.white;
+        const rt = getOthelloResultText('\u9ED2');
+        statusEl.textContent = rt + ' ' + count.black + ' - ' + count.white;
         statusEl.style.background = '#2e7d32';
-        showGameResult('\u9ED2\u306E\u52DD\u3061\uFF01', true);
+        showGameResult(rt, isOthelloPlayerWin('\u9ED2'));
         playWinSound();
       } else if (count.white > count.black) {
-        statusEl.textContent = '\u767D\u306E\u52DD\u3061\uFF01 ' + count.white + ' - ' + count.black;
+        const rt = getOthelloResultText('\u767D');
+        statusEl.textContent = rt + ' ' + count.white + ' - ' + count.black;
         statusEl.style.background = '#2e7d32';
-        showGameResult('\u767D\u306E\u52DD\u3061\uFF01', true);
+        showGameResult(rt, isOthelloPlayerWin('\u767D'));
         playWinSound();
       } else {
         statusEl.textContent = '\u5F15\u304D\u5206\u3051\uFF01 ' + count.black + ' - ' + count.white;

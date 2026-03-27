@@ -160,9 +160,10 @@ const ChessGame = (function() {
             stopTimer();
             gameOver = true;
             const statusEl = el('chess-status');
-            statusEl.textContent = '\u6642\u9593\u5207\u308C\uFF01 \u9ED2\u306E\u52DD\u3061\uFF01';
+            const rt1 = getResultText('\u9ED2');
+            statusEl.textContent = '\u6642\u9593\u5207\u308C\uFF01 ' + rt1;
             statusEl.style.background = '#8b0000';
-            showGameResult('\u9ED2\u306E\u52DD\u3061\uFF01', true);
+            showGameResult(rt1, isPlayerWin('\u9ED2'));
             playWinSound();
           }
         }
@@ -177,9 +178,10 @@ const ChessGame = (function() {
             stopTimer();
             gameOver = true;
             const statusEl = el('chess-status');
-            statusEl.textContent = '\u6642\u9593\u5207\u308C\uFF01 \u767D\u306E\u52DD\u3061\uFF01';
+            const rt2 = getResultText('\u767D');
+            statusEl.textContent = '\u6642\u9593\u5207\u308C\uFF01 ' + rt2;
             statusEl.style.background = '#8b0000';
-            showGameResult('\u767D\u306E\u52DD\u3061\uFF01', true);
+            showGameResult(rt2, isPlayerWin('\u767D'));
             playWinSound();
           }
         }
@@ -587,6 +589,22 @@ const ChessGame = (function() {
     return gameMode !== 'pvp' && turn === 'b';
   }
 
+  function isCpuMode() {
+    return gameMode !== 'pvp';
+  }
+
+  // CPU戦ではプレイヤー=白。勝者に応じてプレイヤー視点のメッセージを返す
+  function getResultText(winner) {
+    if (!isCpuMode()) return winner + '\u306E\u52DD\u3061\uFF01';
+    // winner is '白' or '黒'
+    return winner === '\u767D' ? '\u3042\u306A\u305F\u306E\u52DD\u3061\uFF01' : '\u3042\u306A\u305F\u306E\u8CA0\u3051\u2026';
+  }
+
+  function isPlayerWin(winner) {
+    if (!isCpuMode()) return true;
+    return winner === '\u767D';
+  }
+
   // ===== End AI =====
 
   function showPromotion(color) {
@@ -745,9 +763,10 @@ const ChessGame = (function() {
       updateTimerDisplay();
       if (inCheck) {
         const winner = (turn === 'w' ? '\u9ED2' : '\u767D');
-        statusEl.textContent = '\u30C1\u30A7\u30C3\u30AF\u30E1\u30A4\u30C8\uFF01 ' + winner + '\u306E\u52DD\u3061\uFF01';
+        const resultText = getResultText(winner);
+        statusEl.textContent = '\u30C1\u30A7\u30C3\u30AF\u30E1\u30A4\u30C8\uFF01 ' + resultText;
         statusEl.style.background = '#8b0000';
-        showGameResult(winner + '\u306E\u52DD\u3061\uFF01', true);
+        showGameResult(resultText, isPlayerWin(winner));
         playWinSound();
       } else {
         statusEl.textContent = '\u30B9\u30C6\u30A4\u30EB\u30E1\u30A4\u30C8\uFF08\u5F15\u304D\u5206\u3051\uFF09';
