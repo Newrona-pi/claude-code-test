@@ -1168,18 +1168,23 @@ const ShogiGame = (function() {
       .shogi-square.shogi-check { box-shadow: inset 0 0 16px 4px rgba(255,0,0,0.6); }
       .shogi-square.shogi-thinking { pointer-events: none; }
       .shogi-piece {
-        z-index: 1; line-height: 1; font-size: 28px;
+        z-index: 1; line-height: 1; font-size: 22px;
         font-family: 'Yu Mincho', 'Hiragino Mincho ProN', 'MS Mincho', serif;
         color: #1a1a1a;
-        filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+        filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.35));
         position: relative;
         font-weight: bold;
+        width: 50px; height: 54px;
+        display: flex; align-items: center; justify-content: center;
+        padding-top: 6px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 54'%3E%3Cpath d='M25 2 L47 16 L44 52 L6 52 L3 16 Z' fill='%23f5deb3' stroke='%23222' stroke-width='1.2'/%3E%3C/svg%3E") no-repeat center/contain;
       }
       .shogi-piece.shogi-gote-piece {
         transform: rotate(180deg);
       }
       .shogi-piece.shogi-promoted {
         color: #c00;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 54'%3E%3Cpath d='M25 2 L47 16 L44 52 L6 52 L3 16 Z' fill='%23f5e6c8' stroke='%23991100' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat center/contain;
       }
       .shogi-piece.shogi-move-anim {
         animation: shogiPieceSlide 0.3s ease-out forwards;
@@ -1253,11 +1258,13 @@ const ShogiGame = (function() {
         font-size: 0.8rem; color: #c9a84c; margin-right: 4px; white-space: nowrap;
       }
       .shogi-hand-piece {
-        font-size: 22px; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+        font-size: 16px; cursor: pointer; padding: 2px 6px; border-radius: 4px;
         font-family: 'Yu Mincho', 'Hiragino Mincho ProN', 'MS Mincho', serif;
-        color: #1a1a1a; background: #dcb35c;
+        color: #1a1a1a; background: transparent;
         transition: all 0.2s; font-weight: bold;
-        user-select: none;
+        user-select: none; display: inline-flex; align-items: center; gap: 1px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 33'%3E%3Cpath d='M15 1.5 L28 10 L26 31.5 L4 31.5 L2 10 Z' fill='%23f5deb3' stroke='%23222' stroke-width='0.8'/%3E%3C/svg%3E") no-repeat left 2px center/24px 28px;
+        padding-left: 28px; min-height: 32px;
       }
       .shogi-hand-piece:hover { background: #f6e47a; }
       .shogi-hand-piece.shogi-hand-selected {
