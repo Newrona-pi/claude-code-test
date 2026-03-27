@@ -291,6 +291,9 @@ function resetGame() {
   render();
   updateStatus();
   updateTimerDisplay();
+  if (timeMode !== 'none' && gameMode === 'pvp') {
+    startTimer();
+  }
 }
 
 function initTimers() {
@@ -888,12 +891,7 @@ async function makeMove(fr, fc, tr, tc, isCpu) {
 
   // Timer handling
   if (!gameOver) {
-    if (!timerStarted && timeMode !== 'none' && gameMode === 'pvp') {
-      // Start timer on first move
-      startTimer();
-    } else {
-      onMoveMadeTimer();
-    }
+    onMoveMadeTimer();
   } else {
     stopTimer();
   }
