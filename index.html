@@ -65,6 +65,7 @@ h1 { font-size: 1.8rem; margin-bottom: 12px; color: #e0e0e0; letter-spacing: 2px
 .piece {
   z-index: 1; line-height: 1; font-size: 54px;
   filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.4));
+  position: relative;
 }
 .piece.white {
   color: #fff;
@@ -75,6 +76,38 @@ h1 { font-size: 1.8rem; margin-bottom: 12px; color: #e0e0e0; letter-spacing: 2px
   color: #222;
   -webkit-text-stroke: 1px #555;
   filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.4));
+}
+.piece.move-anim {
+  animation: pieceSlide 0.3s ease-out forwards;
+}
+@keyframes pieceSlide {
+  from { transform: translate(var(--dx), var(--dy)) scale(1.15); }
+  to { transform: translate(0, 0) scale(1); }
+}
+.piece.capture-anim {
+  animation: pieceCapture 0.35s ease-out forwards;
+}
+@keyframes pieceCapture {
+  0% { transform: translate(var(--dx), var(--dy)) scale(1.2); }
+  50% { transform: translate(0, 0) scale(1.25); filter: drop-shadow(0 0 12px rgba(255,200,0,0.8)); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+.square.capture-flash {
+  animation: captureFlash 0.4s ease-out;
+}
+@keyframes captureFlash {
+  0% { box-shadow: inset 0 0 0 0 rgba(255,150,0,0); }
+  30% { box-shadow: inset 0 0 20px 8px rgba(255,150,0,0.5); }
+  100% { box-shadow: none; }
+}
+.square.check-anim {
+  animation: checkPulse 0.6s ease-in-out;
+}
+@keyframes checkPulse {
+  0% { box-shadow: inset 0 0 0 0 rgba(255,0,0,0); }
+  30% { box-shadow: inset 0 0 24px 8px rgba(255,0,0,0.7); }
+  60% { box-shadow: inset 0 0 12px 4px rgba(255,0,0,0.4); }
+  100% { box-shadow: inset 0 0 16px 4px rgba(255,0,0,0.6); }
 }
 .buttons { margin-top: 16px; }
 .buttons button {
@@ -663,6 +696,7 @@ async function makeMove(fr, fc, tr, tc, isCpu) {
   }
 
   histEntry.lastMove = [fr, fc, tr, tc];
+  histEntry.wasCapture = !!(captured || epCaptured);
   history.push(histEntry);
   turn = turn === 'w' ? 'b' : 'w';
   selected = null;
@@ -776,6 +810,20 @@ function render() {
         const p = document.createElement('span');
         p.className = 'piece ' + (isBlack(board[r][c]) ? 'black' : 'white');
         p.textContent = PIECES[board[r][c]];
+        // Animate moved piece
+        if (lastMove && r === lastMove[2] && c === lastMove[3]) {
+          const dr = lastMove[0] - lastMove[2];
+          const dc = lastMove[1] - lastMove[3];
+          p.style.setProperty('--dx', (dc * 72) + 'px');
+          p.style.setProperty('--dy', (dr * 72) + 'px');
+          const wasCapture = history.length > 0 && history[history.length - 1].wasCapture;
+          p.classList.add(wasCapture ? 'capture-anim' : 'move-anim');
+          if (wasCapture) sq.classList.add('capture-flash');
+        }
+        // Animate check
+        if (inCheck && kingPos && kingPos[0] === r && kingPos[1] === c) {
+          sq.classList.add('check-anim');
+        }
         sq.appendChild(p);
       }
 
