@@ -255,133 +255,284 @@ function toggleMute() {
   document.getElementById('mute-btn').textContent = soundMuted ? '🔇' : '🔊';
 }
 
-function playMoveSound() {
-  if (soundMuted) return;
-  const ctx = getAudioCtx();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(600, ctx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.08);
-  gain.gain.setValueAtTime(0.15, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-  osc.start(ctx.currentTime);
-  osc.stop(ctx.currentTime + 0.12);
+// Helper: create noise buffer
+function _noiseBuf(ctx, dur, vol) {
+  const n = ctx.sampleRate * dur;
+  const buf = ctx.createBuffer(1, n, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * vol;
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const g = ctx.createGain();
+  src.connect(g); g.connect(ctx.destination);
+  g.gain.setValueAtTime(vol, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+  src.start(ctx.currentTime);
+  src.stop(ctx.currentTime + dur);
 }
 
-function playCaptureSound() {
-  if (soundMuted) return;
-  const ctx = getAudioCtx();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.type = 'triangle';
-  osc.frequency.setValueAtTime(800, ctx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.15);
-  gain.gain.setValueAtTime(0.2, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-  osc.start(ctx.currentTime);
-  osc.stop(ctx.currentTime + 0.2);
-  const bufSize = ctx.sampleRate * 0.05;
-  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-  const data = buf.getChannelData(0);
-  for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * 0.1;
-  const noise = ctx.createBufferSource();
-  noise.buffer = buf;
-  const noiseGain = ctx.createGain();
-  noise.connect(noiseGain);
-  noiseGain.connect(ctx.destination);
-  noiseGain.gain.setValueAtTime(0.15, ctx.currentTime);
-  noiseGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
-  noise.start(ctx.currentTime);
-  noise.stop(ctx.currentTime + 0.08);
+// ── Chess: classic wooden piece on marble ──
+function _chessMoveSound() {
+  const ctx = getAudioCtx(); const t = ctx.currentTime;
+  // Wooden tap
+  const o = ctx.createOscillator(); const g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = 'triangle';
+  o.frequency.setValueAtTime(800, t);
+  o.frequency.exponentialRampToValueAtTime(300, t + 0.06);
+  g.gain.setValueAtTime(0.18, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+  o.start(t); o.stop(t + 0.1);
+  _noiseBuf(ctx, 0.04, 0.06);
 }
-
-function playCheckSound() {
-  if (soundMuted) return;
-  const ctx = getAudioCtx();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.type = 'square';
-  osc.frequency.setValueAtTime(1000, ctx.currentTime);
-  osc.frequency.setValueAtTime(800, ctx.currentTime + 0.1);
-  osc.frequency.setValueAtTime(1000, ctx.currentTime + 0.2);
-  gain.gain.setValueAtTime(0.1, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-  osc.start(ctx.currentTime);
-  osc.stop(ctx.currentTime + 0.3);
+function _chessCaptureSound() {
+  const ctx = getAudioCtx(); const t = ctx.currentTime;
+  // Impact thud
+  const o = ctx.createOscillator(); const g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = 'triangle';
+  o.frequency.setValueAtTime(500, t);
+  o.frequency.exponentialRampToValueAtTime(120, t + 0.12);
+  g.gain.setValueAtTime(0.25, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+  o.start(t); o.stop(t + 0.18);
+  // Clash
+  const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+  o2.connect(g2); g2.connect(ctx.destination);
+  o2.type = 'sawtooth';
+  o2.frequency.setValueAtTime(1200, t);
+  o2.frequency.exponentialRampToValueAtTime(400, t + 0.08);
+  g2.gain.setValueAtTime(0.08, t);
+  g2.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+  o2.start(t); o2.stop(t + 0.1);
+  _noiseBuf(ctx, 0.06, 0.12);
 }
-
-function playWinSound() {
-  if (soundMuted) return;
-  const ctx = getAudioCtx();
-  const notes = [523, 659, 784, 1047];
-  notes.forEach((freq, i) => {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.15);
-    gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.15);
-    gain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + i * 0.15 + 0.05);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.15 + 0.4);
-    osc.start(ctx.currentTime + i * 0.15);
-    osc.stop(ctx.currentTime + i * 0.15 + 0.4);
+function _chessCheckSound() {
+  const ctx = getAudioCtx(); const t = ctx.currentTime;
+  // Dramatic two-tone
+  [0, 0.12].forEach((dt, i) => {
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'square';
+    o.frequency.setValueAtTime(i === 0 ? 880 : 1100, t + dt);
+    g.gain.setValueAtTime(0.08, t + dt);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dt + 0.15);
+    o.start(t + dt); o.stop(t + dt + 0.15);
+  });
+}
+function _chessWinSound() {
+  const ctx = getAudioCtx(); const t = ctx.currentTime;
+  // Triumphant brass fanfare: C-E-G-C
+  [523, 659, 784, 1047].forEach((f, i) => {
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(f, t + i * 0.18);
+    g.gain.setValueAtTime(0, t + i * 0.18);
+    g.gain.linearRampToValueAtTime(0.1, t + i * 0.18 + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.18 + 0.5);
+    o.start(t + i * 0.18); o.stop(t + i * 0.18 + 0.5);
   });
 }
 
-function playDrawSound() {
-  if (soundMuted) return;
-  const ctx = getAudioCtx();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(400, ctx.currentTime);
-  osc.frequency.linearRampToValueAtTime(300, ctx.currentTime + 0.5);
-  gain.gain.setValueAtTime(0.12, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-  osc.start(ctx.currentTime);
-  osc.stop(ctx.currentTime + 0.5);
+// ── Shogi: tatami room, wood on wood ──
+function _shogiMoveSound() {
+  const ctx = getAudioCtx(); const t = ctx.currentTime;
+  // パチッ — sharp wooden clack
+  const o = ctx.createOscillator(); const g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = 'square';
+  o.frequency.setValueAtTime(2000, t);
+  o.frequency.exponentialRampToValueAtTime(400, t + 0.03);
+  g.gain.setValueAtTime(0.15, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+  o.start(t); o.stop(t + 0.08);
+  // Resonance
+  const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+  o2.connect(g2); g2.connect(ctx.destination);
+  o2.type = 'sine';
+  o2.frequency.setValueAtTime(250, t + 0.02);
+  g2.gain.setValueAtTime(0.08, t + 0.02);
+  g2.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+  o2.start(t + 0.02); o2.stop(t + 0.15);
+}
+function _shogiCaptureSound() {
+  const ctx = getAudioCtx(); const t = ctx.currentTime;
+  // バシッ — heavy slam
+  const o = ctx.createOscillator(); const g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = 'square';
+  o.frequency.setValueAtTime(2500, t);
+  o.frequency.exponentialRampToValueAtTime(200, t + 0.04);
+  g.gain.setValueAtTime(0.2, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+  o.start(t); o.stop(t + 0.1);
+  // Deep thud
+  const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+  o2.connect(g2); g2.connect(ctx.destination);
+  o2.type = 'sine';
+  o2.frequency.setValueAtTime(150, t);
+  o2.frequency.exponentialRampToValueAtTime(80, t + 0.15);
+  g2.gain.setValueAtTime(0.15, t);
+  g2.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+  o2.start(t); o2.stop(t + 0.2);
+  _noiseBuf(ctx, 0.05, 0.1);
+}
+function _shogiDropSound() {
+  const ctx = getAudioCtx(); const t = ctx.currentTime;
+  // カチッ — lighter click for drop
+  const o = ctx.createOscillator(); const g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = 'square';
+  o.frequency.setValueAtTime(3000, t);
+  o.frequency.exponentialRampToValueAtTime(600, t + 0.025);
+  g.gain.setValueAtTime(0.12, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+  o.start(t); o.stop(t + 0.06);
+  const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+  o2.connect(g2); g2.connect(ctx.destination);
+  o2.type = 'sine';
+  o2.frequency.setValueAtTime(350, t + 0.015);
+  g2.gain.setValueAtTime(0.06, t + 0.015);
+  g2.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+  o2.start(t + 0.015); o2.stop(t + 0.1);
+}
+function _shogiCheckSound() {
+  const ctx = getAudioCtx(); const t = ctx.currentTime;
+  // 太鼓風の王手警告
+  const o = ctx.createOscillator(); const g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = 'sine';
+  o.frequency.setValueAtTime(200, t);
+  g.gain.setValueAtTime(0.2, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+  o.start(t); o.stop(t + 0.3);
+  // Second beat
+  const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+  o2.connect(g2); g2.connect(ctx.destination);
+  o2.type = 'sine';
+  o2.frequency.setValueAtTime(250, t + 0.2);
+  g2.gain.setValueAtTime(0.15, t + 0.2);
+  g2.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+  o2.start(t + 0.2); o2.stop(t + 0.45);
+  _noiseBuf(ctx, 0.08, 0.08);
+}
+function _shogiWinSound() {
+  const ctx = getAudioCtx(); const t = ctx.currentTime;
+  // 和風 — pentatonic scale (D-E-G-A-D)
+  [294, 330, 392, 440, 587].forEach((f, i) => {
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sine';
+    o.frequency.setValueAtTime(f, t + i * 0.2);
+    g.gain.setValueAtTime(0, t + i * 0.2);
+    g.gain.linearRampToValueAtTime(0.12, t + i * 0.2 + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.2 + 0.55);
+    o.start(t + i * 0.2); o.stop(t + i * 0.2 + 0.55);
+  });
 }
 
+// ── Othello: smooth stone on board ──
+function _othelloStoneSound() {
+  const ctx = getAudioCtx(); const t = ctx.currentTime;
+  // カツン — stone tap
+  const o = ctx.createOscillator(); const g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = 'sine';
+  o.frequency.setValueAtTime(1200, t);
+  o.frequency.exponentialRampToValueAtTime(350, t + 0.04);
+  g.gain.setValueAtTime(0.15, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+  o.start(t); o.stop(t + 0.08);
+  _noiseBuf(ctx, 0.03, 0.05);
+}
+function _othelloFlipSound() {
+  const ctx = getAudioCtx(); const t = ctx.currentTime;
+  // パラパラ — cascading flip
+  for (let i = 0; i < 3; i++) {
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sine';
+    const dt = i * 0.06;
+    o.frequency.setValueAtTime(900 + i * 200, t + dt);
+    o.frequency.exponentialRampToValueAtTime(400, t + dt + 0.04);
+    g.gain.setValueAtTime(0.06, t + dt);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dt + 0.06);
+    o.start(t + dt); o.stop(t + dt + 0.06);
+  }
+}
+function _othelloWinSound() {
+  const ctx = getAudioCtx(); const t = ctx.currentTime;
+  // Clean major chord
+  [440, 554, 659].forEach(f => {
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sine';
+    o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.1, t + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
+    o.start(t); o.stop(t + 0.8);
+  });
+  // Resolve up
+  const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+  o2.connect(g2); g2.connect(ctx.destination);
+  o2.type = 'sine';
+  o2.frequency.setValueAtTime(880, t + 0.4);
+  g2.gain.setValueAtTime(0, t + 0.4);
+  g2.gain.linearRampToValueAtTime(0.12, t + 0.45);
+  g2.gain.exponentialRampToValueAtTime(0.001, t + 1.0);
+  o2.start(t + 0.4); o2.stop(t + 1.0);
+}
+
+// Common draw sound
+function _drawSound() {
+  if (soundMuted) return;
+  const ctx = getAudioCtx(); const t = ctx.currentTime;
+  // Minor descend
+  [392, 370, 330].forEach((f, i) => {
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sine';
+    o.frequency.setValueAtTime(f, t + i * 0.2);
+    g.gain.setValueAtTime(0, t + i * 0.2);
+    g.gain.linearRampToValueAtTime(0.1, t + i * 0.2 + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.2 + 0.45);
+    o.start(t + i * 0.2); o.stop(t + i * 0.2 + 0.45);
+  });
+}
+
+// ── Dispatcher functions (called by game JS files) ──
+function playMoveSound() {
+  if (soundMuted) return;
+  if (currentGame === 'shogi') _shogiMoveSound();
+  else _chessMoveSound(); // chess
+}
+function playCaptureSound() {
+  if (soundMuted) return;
+  if (currentGame === 'shogi') _shogiCaptureSound();
+  else if (currentGame === 'othello') _othelloFlipSound();
+  else _chessCaptureSound();
+}
+function playCheckSound() {
+  if (soundMuted) return;
+  if (currentGame === 'shogi') _shogiCheckSound();
+  else _chessCheckSound();
+}
+function playWinSound() {
+  if (soundMuted) return;
+  if (currentGame === 'shogi') _shogiWinSound();
+  else if (currentGame === 'othello') _othelloWinSound();
+  else _chessWinSound();
+}
+function playDrawSound() { _drawSound(); }
 function playStoneSound() {
   if (soundMuted) return;
-  const ctx = getAudioCtx();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(500, ctx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(250, ctx.currentTime + 0.06);
-  gain.gain.setValueAtTime(0.12, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
-  osc.start(ctx.currentTime);
-  osc.stop(ctx.currentTime + 0.1);
+  _othelloStoneSound();
 }
-
 function playDropSound() {
   if (soundMuted) return;
-  const ctx = getAudioCtx();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.type = 'triangle';
-  osc.frequency.setValueAtTime(700, ctx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(350, ctx.currentTime + 0.1);
-  gain.gain.setValueAtTime(0.15, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-  osc.start(ctx.currentTime);
-  osc.stop(ctx.currentTime + 0.15);
+  _shogiDropSound();
 }
 
 let currentGame = null;
