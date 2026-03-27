@@ -109,12 +109,14 @@ h1 { font-size: 1.8rem; margin-bottom: 12px; color: #e0e0e0; letter-spacing: 2px
 <div class="container">
   <h1>♔ チェス ♚</h1>
   <div id="mode-selector">
-    <button onclick="setMode('pvp')" id="btn-pvp">対人戦</button>
-    <button onclick="setMode('cpu-beginner')" id="btn-cpu-beginner">CPU（入門）</button>
-    <button onclick="setMode('cpu-easy')" id="btn-cpu-easy">CPU（初級）</button>
-    <button onclick="setMode('cpu-medium')" id="btn-cpu-medium">CPU（中級）</button>
-    <button onclick="setMode('cpu-hard')" id="btn-cpu-hard">CPU（上級）</button>
-    <button onclick="setMode('cpu-expert')" id="btn-cpu-expert">CPU（最強）</button>
+    <div style="width:100%; display:flex; justify-content:center; margin-bottom:6px;">
+      <button onclick="setMode('pvp')" id="btn-pvp">👥 対人戦</button>
+    </div>
+    <button onclick="setMode('cpu-beginner')" id="btn-cpu-beginner">入門</button>
+    <button onclick="setMode('cpu-easy')" id="btn-cpu-easy">初級</button>
+    <button onclick="setMode('cpu-medium')" id="btn-cpu-medium">中級</button>
+    <button onclick="setMode('cpu-hard')" id="btn-cpu-hard">上級</button>
+    <button onclick="setMode('cpu-expert')" id="btn-cpu-expert">最強</button>
   </div>
   <div id="status">白の番です</div>
   <div class="board-wrapper">
