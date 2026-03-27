@@ -9,11 +9,29 @@
 body {
   display: flex; justify-content: center; align-items: flex-start;
   min-height: 100vh;
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(34,60,30,0.4) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 50%, rgba(30,34,60,0.4) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 100%, rgba(60,40,20,0.3) 0%, transparent 50%),
-    linear-gradient(180deg, #1a1a2e 0%, #1c2618 50%, #2a1f14 100%);
+  /* Wood table base */
+  background-color: #5c3a1e;
+  background-image:
+    /* Wood grain lines */
+    repeating-linear-gradient(
+      95deg,
+      transparent 0px, transparent 18px,
+      rgba(0,0,0,0.06) 18px, rgba(0,0,0,0.06) 19px,
+      transparent 19px, transparent 40px
+    ),
+    repeating-linear-gradient(
+      92deg,
+      transparent 0px, transparent 30px,
+      rgba(255,220,160,0.04) 30px, rgba(255,220,160,0.04) 31px,
+      transparent 31px, transparent 55px
+    ),
+    /* Subtle knot/variation */
+    radial-gradient(ellipse at 30% 40%, rgba(80,50,20,0.5) 0%, transparent 40%),
+    radial-gradient(ellipse at 75% 70%, rgba(90,55,25,0.4) 0%, transparent 35%),
+    /* Warm lighting from above */
+    radial-gradient(ellipse at 50% 0%, rgba(255,230,180,0.12) 0%, transparent 60%),
+    /* Base gradient */
+    linear-gradient(180deg, #6b4426 0%, #5c3a1e 30%, #4a2e15 70%, #3d2410 100%);
   background-attachment: fixed;
   font-family: 'Segoe UI', sans-serif;
   color: #e0e0e0; padding-top: 20px;
@@ -21,21 +39,33 @@ body {
 }
 body::before {
   content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  /* Fine wood texture noise */
   background-image:
-    radial-gradient(circle at 15% 15%, rgba(255,255,200,0.03) 1px, transparent 1px),
-    radial-gradient(circle at 85% 25%, rgba(255,255,200,0.02) 1px, transparent 1px),
-    radial-gradient(circle at 45% 80%, rgba(255,255,200,0.03) 1px, transparent 1px),
-    radial-gradient(circle at 70% 60%, rgba(255,255,200,0.02) 1px, transparent 1px);
-  background-size: 200px 200px, 300px 300px, 250px 250px, 350px 350px;
+    repeating-linear-gradient(
+      88deg,
+      transparent 0px, transparent 3px,
+      rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px
+    ),
+    repeating-linear-gradient(
+      93deg,
+      transparent 0px, transparent 7px,
+      rgba(255,200,120,0.02) 7px, rgba(255,200,120,0.02) 8px
+    );
   pointer-events: none; z-index: 0;
 }
 .container {
   text-align: center; display: inline-flex; flex-direction: column; align-items: center;
   max-width: 700px; width: 100%;
   position: relative; z-index: 1;
-  background: radial-gradient(ellipse at center, rgba(20,20,40,0.6) 0%, transparent 70%);
-  padding: 20px 10px 30px;
-  border-radius: 20px;
+  /* Felt mat on the table */
+  background: linear-gradient(180deg, rgba(15,30,20,0.85) 0%, rgba(20,35,25,0.9) 100%);
+  padding: 24px 20px 30px;
+  border-radius: 16px;
+  border: 3px solid rgba(80,60,30,0.6);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 0 60px rgba(0,0,0,0.3);
 }
 
 /* Game Tabs */
